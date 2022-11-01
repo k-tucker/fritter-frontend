@@ -27,6 +27,7 @@ class FreetCollection {
       content,
       dateModified: date
     });
+    await UserCollection.addFreet(authorId, freet._id); // Associate freet with user on user-side
     await freet.save(); // Saves freet to MongoDB
     return freet.populate('authorId');
   }
@@ -52,13 +53,14 @@ class FreetCollection {
   }
 
   /**
-   * Get all the freets in by given author
+   * Get all the freets by given author
    *
    * @param {string} username - The username of author of the freets
    * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
    */
   static async findAllByUsername(username: string): Promise<Array<HydratedDocument<Freet>>> {
     const author = await UserCollection.findOneByUsername(username);
+    // return FreetModel.find({authorId: author._id});
     return FreetModel.find({authorId: author._id}).sort({dateModified: -1}).populate('authorId');
   }
 
@@ -66,12 +68,16 @@ class FreetCollection {
    * Update a freet with the new content
    *
    * @param {string} freetId - The id of the freet to be updated
-   * @param {string} content - The new content of the freet
+   * @param {Object} freetDetails - An object with the freet's updated details
    * @return {Promise<HydratedDocument<Freet>>} - The newly updated freet
    */
-  static async updateOne(freetId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
+  static async updateOne(freetId: Types.ObjectId | string, freetDetails: any): Promise<HydratedDocument<Freet>> {
     const freet = await FreetModel.findOne({_id: freetId});
-    freet.content = content;
+
+    if (freetDetails.content) {
+      freet.content = freetDetails.content as string;
+    }
+
     freet.dateModified = new Date();
     await freet.save();
     return freet.populate('authorId');
@@ -84,6 +90,8 @@ class FreetCollection {
    * @return {Promise<Boolean>} - true if the freet has been deleted, false otherwise
    */
   static async deleteOne(freetId: Types.ObjectId | string): Promise<boolean> {
+    const freetTBD = await FreetCollection.findOne(freetId);
+    await UserCollection.deleteFreet(freetTBD.authorId, freetId);
     const freet = await FreetModel.deleteOne({_id: freetId});
     return freet !== null;
   }
@@ -95,6 +103,7 @@ class FreetCollection {
    */
   static async deleteMany(authorId: Types.ObjectId | string): Promise<void> {
     await FreetModel.deleteMany({authorId});
+    await UserCollection.deleteManyFreet(authorId);
   }
 }
 

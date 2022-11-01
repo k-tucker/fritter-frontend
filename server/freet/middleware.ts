@@ -1,6 +1,6 @@
 import type {Request, Response, NextFunction} from 'express';
 import {Types} from 'mongoose';
-import FreetCollection from '../freet/collection';
+import FreetCollection from './collection';
 
 /**
  * Checks if a freet with freetId is req.params exists
@@ -23,6 +23,11 @@ const isFreetExists = async (req: Request, res: Response, next: NextFunction) =>
  * spaces and not more than 140 characters
  */
 const isValidFreetContent = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.content) {
+    next();
+    return;
+  }
+
   const {content} = req.body as {content: string};
   if (!content.trim()) {
     res.status(400).json({
@@ -46,7 +51,7 @@ const isValidFreetContent = (req: Request, res: Response, next: NextFunction) =>
  */
 const isValidFreetModifier = async (req: Request, res: Response, next: NextFunction) => {
   const freet = await FreetCollection.findOne(req.params.freetId);
-  const userId = freet.authorId._id;
+  const userId = freet.authorId;
   if (req.session.userId !== userId.toString()) {
     res.status(403).json({
       error: 'Cannot modify other users\' freets.'

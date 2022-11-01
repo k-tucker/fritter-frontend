@@ -1,3 +1,4 @@
+/* eslint-disable capitalized-comments */
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 
@@ -12,6 +13,11 @@ export type User = {
   username: string;
   password: string;
   dateJoined: Date;
+  following: string[];
+  freets: string[];
+  quotes: string[];
+  highlights: string[];
+  // highlights: Set<Types.ObjectId>;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -31,6 +37,26 @@ const UserSchema = new Schema({
   // The date the user joined
   dateJoined: {
     type: Date,
+    required: true
+  },
+  // All Users followed by this User
+  following: {
+    type: Array,
+    required: true
+  },
+  // All IDs of Freets this User has authored
+  freets: {
+    type: Array,
+    required: true
+  },
+  // All IDs of Quote Freets this User has authored
+  quotes: {
+    type: Array,
+    required: true
+  },
+  // All IDs of posts this User has highlighted (denotes what tyoe of post)
+  highlights: {
+    type: Array,
     required: true
   }
 });

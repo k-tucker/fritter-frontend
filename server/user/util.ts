@@ -7,6 +7,10 @@ type UserResponse = {
   _id: string;
   username: string;
   dateJoined: string;
+  following: string[];
+  freets: string[];
+  quotes: string[];
+  highlights: string[]; // Set to prevent duplicates when you highlight twice
 };
 
 /**
@@ -32,10 +36,15 @@ const constructUserResponse = (user: HydratedDocument<User>): UserResponse => {
     })
   };
   delete userCopy.password;
+
   return {
     ...userCopy,
     _id: userCopy._id.toString(),
-    dateJoined: formatDate(user.dateJoined)
+    dateJoined: formatDate(user.dateJoined),
+    highlights: userCopy.highlights,
+    following: userCopy.following,
+    quotes: userCopy.quotes,
+    freets: userCopy.freets
   };
 };
 
