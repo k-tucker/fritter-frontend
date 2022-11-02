@@ -35,6 +35,7 @@
           🗑️ Delete
         </button>
       </div>
+
     </header>
     <textarea
       v-if="editing"
@@ -52,6 +53,18 @@
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
     </p>
+    <button 
+      v-if="!liked"
+      @click="likePost"
+    >
+        ❤️ Like
+    </button>
+    <button 
+      v-if="liked"
+      @click="unlikePost"
+    >
+        ❤️ Liked
+    </button>
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -77,6 +90,7 @@ export default {
   data() {
     return {
       editing: false, // Whether or not this freet is in edit mode
+      liked: false,
       draft: this.freet.content, // Potentially-new content for this freet
       alerts: {} // Displays success/error messages encountered during freet modification
     };
@@ -95,6 +109,18 @@ export default {
        */
       this.editing = false;
       this.draft = this.freet.content;
+    },
+    likePost() {
+      /**
+       * Toggles on a like on this post.
+       */
+      this.liked = true; // Keeps track of if a freet is being edited
+    },
+    unlikePost() {
+      /**
+       * Toggles off the like on this post.
+       */
+      this.liked = false;
     },
     deleteFreet() {
       /**
