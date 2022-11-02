@@ -1,6 +1,6 @@
 import type {HydratedDocument} from 'mongoose';
 import moment from 'moment';
-import type {Freet} from './model';
+import type {Freet, PopulatedFreet} from './model';
 import UserCollection from '../user/collection';
 
 // Update this if you add a property to the Freet type!
@@ -27,21 +27,22 @@ const formatDate = (date: Date): string => moment(date).format('MMMM Do YYYY, h:
  * @param {HydratedDocument<Freet>} freet - A freet
  * @returns {FreetResponse} - The freet object formatted for the frontend
  */
-const constructFreetResponse = async (freet: HydratedDocument<Freet>): Promise<FreetResponse> => {
+const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse => {
   // const populatedFreet = await (await freet.populate('content'));
-  const freetCopy: Freet = {
+  const freetCopy: PopulatedFreet = {
     ...freet.toObject({
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-  const user = await UserCollection.findOneByUserId(freetCopy.authorId);
+  const {username} = freetCopy.authorId;
+  // const user = await UserCollection.findOneByUserId(freetCopy.authorId);
   // console.log(user.username);
   // console.log(freetCopy.content);
   delete freetCopy.authorId;
   return {
     ...freetCopy,
     _id: freetCopy._id.toString(),
-    author: user.username,
+    author: username,
     dateCreated: formatDate(freetCopy.dateCreated),
     dateModified: formatDate(freetCopy.dateModified)
   };

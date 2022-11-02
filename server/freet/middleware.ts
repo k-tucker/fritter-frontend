@@ -50,8 +50,8 @@ const isValidFreetContent = (req: Request, res: Response, next: NextFunction) =>
  * Checks if the current user is the author of the freet whose freetId is in req.params
  */
 const isValidFreetModifier = async (req: Request, res: Response, next: NextFunction) => {
-  const freet = await FreetCollection.findOne(req.params.freetId);
-  const userId = freet.authorId;
+  const freet = await (await FreetCollection.findOne(req.params.freetId)).populate('authorId');
+  const userId = freet.authorId._id;
   if (req.session.userId !== userId.toString()) {
     res.status(403).json({
       error: 'Cannot modify other users\' freets.'

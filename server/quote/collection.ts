@@ -19,7 +19,6 @@ class QuoteCollection {
    * @return {Promise<HydratedDocument<Quote>>} - The newly created quote freet
    */
   static async addOne(authorId: Types.ObjectId | string, refId: Types.ObjectId | string, content: string, anon: boolean): Promise<HydratedDocument<Quote>> {
-    console.log(authorId, refId, content);
     const freet = await FreetCollection.findOne(refId);
     const refContent = freet.content;
     const date = new Date();
