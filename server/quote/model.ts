@@ -1,5 +1,7 @@
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
+import type { User } from '../user/model';
+import type { Freet } from '../freet/model';
 
 /**
  * This file defines the properties stored in a Quote Freet
@@ -10,7 +12,20 @@ import {Schema, model} from 'mongoose';
 export type Quote = {
   _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
   authorId: Types.ObjectId;
+  refAuthor: Types.ObjectId;
   refId: Types.ObjectId; // ID of Freet being Quote Freeted
+  refContent: string;
+  dateCreated: Date;
+  content: string;
+  dateModified: Date;
+  anon: boolean;
+};
+
+export type PopulatedQuote = {
+  _id: Types.ObjectId; // MongoDB assigns each object this ID on creation
+  authorId: User;
+  refAuthor: User;
+  refId: string;
   refContent: string;
   dateCreated: Date;
   content: string;
@@ -34,6 +49,12 @@ const QuoteSchema = new Schema<Quote>({
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'Freet'
+  },
+  // The ID of the freet this quote freet is referencing
+  refAuthor: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
   },
   // Capture the content as it is when quoted
   refContent: {

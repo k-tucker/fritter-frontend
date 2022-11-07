@@ -51,8 +51,8 @@ const isValidQuoteContent = (req: Request, res: Response, next: NextFunction) =>
  */
 const isValidQuoteModifier = async (req: Request, res: Response, next: NextFunction) => {
   const quote = await QuoteCollection.findOne(req.params.quoteId);
-  const userId = quote.authorId;
-  if (req.session.userId !== userId.toString()) {
+  const userId = quote.authorId._id;
+  if (req.session.userId.toString() !== userId.toString()) {
     res.status(403).json({
       error: 'Cannot modify other users\' quote freets.'
     });

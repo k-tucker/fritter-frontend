@@ -25,18 +25,18 @@
       <header>
         <div class="left">
           <h2>
-            Viewing all freets
+            Viewing all posts
             <span v-if="$store.state.filter">
               by @{{ $store.state.filter }}
             </span>
           </h2>
         </div>
         <div class="right">
-          <GetFreetsForm
-            ref="getFreetsForm"
+          <GetPostsForm
+            ref="getPostsForm"
             value="author"
             placeholder="🔍 Filter by author (optional)"
-            button="🔄 Get freets"
+            button="🔄 Get posts"
           />
         </div>
       </header>
@@ -48,11 +48,16 @@
           :key="freet.id"
           :freet="freet"
         />
+        <QuoteComponent
+          v-for="quote in $store.state.quotes"
+          :key="quote.id"
+          :quote="quote"
+        />
       </section>
       <article
         v-else
       >
-        <h3>No freets found.</h3>
+        <h3>No posts found.</h3>
       </article>
     </section>
   </main>
@@ -60,14 +65,15 @@
 
 <script>
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
+import QuoteComponent from '@/components/Quote/QuoteComponent.vue';
 import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
-import GetFreetsForm from '@/components/Freet/GetFreetsForm.vue';
+import GetPostsForm from '@/components/Freet/GetPostsForm.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, GetFreetsForm, CreateFreetForm},
+  components: {FreetComponent, QuoteComponent, GetPostsForm, CreateFreetForm},
   mounted() {
-    this.$refs.getFreetsForm.submit();
+    this.$refs.getPostsForm.submit();
   },
   computed: {
     console: () => console,

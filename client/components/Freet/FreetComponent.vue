@@ -51,7 +51,7 @@
     </p>
     <p class="info">
       Posted at {{ freet.dateModified }}
-      <i v-if="freet.edited">(edited)</i>
+      <i v-if="freet.dateModified !== freet.dateCreated">(edited)</i>
     </p>
     <button 
       v-if="!liked"
@@ -64,6 +64,41 @@
       @click="unlikePost"
     >
         ❤️ Liked
+    </button>
+    <button 
+      v-if="!quoting"
+      @click="quoteFreet"
+    >
+        💬 Quote
+    </button>
+    <textarea
+      v-if="quoting"
+      class="content"
+      @input="quoteText = $event.target.value"
+    />
+    <button
+      v-if="anonCondition1"
+      @click="unanonymize"
+    >
+      Anonymized
+    </button>
+    <button
+      v-if="anonCondition2"
+      @click="anonymize"
+    >
+      Non-anonymized
+    </button>
+    <button
+      v-if="quoting"
+      @click="submitQuote"
+    >
+      ✅ Post quote
+    </button>
+    <button
+      v-if="quoting"
+      @click="stopQuoting"
+    >
+      🚫 Cancel quote
     </button>
     <section class="alerts">
       <article
@@ -87,12 +122,23 @@ export default {
       required: true
     }
   },
+  computed: {
+    anonCondition1() {
+      return this.quoting && this.anon;
+    },
+    anonCondition2() {
+      return this.quoting && !(this.anon);
+    }
+  },
   data() {
     return {
       editing: false, // Whether or not this freet is in edit mode
       liked: false,
+      quoting: false,
+      anon: false,
       draft: this.freet.content, // Potentially-new content for this freet
-      alerts: {} // Displays success/error messages encountered during freet modification
+      alerts: {}, // Displays success/error messages encountered during freet modification
+      quoteText: ''
     };
   },
   methods: {
@@ -121,6 +167,30 @@ export default {
        * Toggles off the like on this post.
        */
       this.liked = false;
+    },
+    anonymize() {
+      /**
+       * Toggles on the anonymity on this quote freet.
+       */
+      this.anon = true; // Keeps track of if a freet is being edited
+    },
+    unanonymize() {
+      /**
+       * Toggles off the anonymity on this quote freet.
+       */
+      this.anon = false;
+    },
+    quoteFreet() {
+      /**
+       * Initiates quote freet.
+       */
+      this.quoting = true;
+    },
+    stopQuoting() {
+      /**
+       * Cancels quote freet.
+       */
+      this.quoting = false;
     },
     deleteFreet() {
       /**
@@ -158,6 +228,30 @@ export default {
       };
       this.request(params);
     },
+    submitQuote() {
+      /**
+       * Posts quote freet.
+       */
+      if (!this.quoteText) {
+        const error = 'Error: Quote freet cannot be empty.';
+        this.$set(this.alerts, error, 'error'); // Set an alert to be the error text, timeout of 3000 ms
+        setTimeout(() => this.$delete(this.alerts, error), 3000);
+        return;
+      }
+
+      const params = {
+        method: 'POST',
+        message: 'Successfully posted quote freet!',
+        body: JSON.stringify({content: this.quoteText,
+                              anon: this.anon,
+                              refId: this.freet._id}),
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.post(params);
+    },
     async request(params) {
       /**
        * Submits a request to the freet's endpoint
@@ -181,6 +275,37 @@ export default {
 
         this.editing = false;
         this.$store.commit('refreshFreets');
+
+        params.callback();
+      } catch (e) {
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+      }
+    },
+    async post(params) {
+      /**
+       * Submits a post to the quote endpoint.
+       * @param params - Options for the request
+       * @param params.body - Body for the request, if it exists
+       * @param params.callback - Function to run if the the request succeeds
+       */
+      const options = {
+        method: params.method, headers: {'Content-Type': 'application/json'}
+      };
+      if (params.body) {
+        options.body = params.body;
+      }
+
+      try {
+        const r = await fetch('/api/quotes', options);
+        if (!r.ok) {
+          const res = await r.json();
+          throw new Error(res.error);
+        }
+
+        this.quoting = false;
+        this.$store.commit('refreshFreets');
+        this.$store.commit('refreshQuotes');
 
         params.callback();
       } catch (e) {

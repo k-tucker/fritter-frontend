@@ -1,5 +1,5 @@
 import type {HydratedDocument, Types} from 'mongoose';
-import type {Quote} from '../quote/model';
+import type {Quote, PopulatedQuote} from '../quote/model';
 import QuoteModel from '../quote/model';
 import UserCollection from '../user/collection';
 import FreetCollection from '../freet/collection';
@@ -19,12 +19,13 @@ class QuoteCollection {
    * @return {Promise<HydratedDocument<Quote>>} - The newly created quote freet
    */
   static async addOne(authorId: Types.ObjectId | string, refId: Types.ObjectId | string, content: string, anon: boolean): Promise<HydratedDocument<Quote>> {
-    const freet = await FreetCollection.findOne(refId);
+    const freet = (await FreetCollection.findOne(refId));
     const refContent = freet.content;
     const date = new Date();
     const quote = new QuoteModel({
       authorId,
       refId,
+      refAuthor: freet.authorId,
       refContent,
       dateCreated: date,
       content,
@@ -33,7 +34,7 @@ class QuoteCollection {
     });
     await UserCollection.addQuote(authorId, quote._id);
     await quote.save(); // Saves quote freet to MongoDB
-    return quote;
+    return quote.populate(['authorId', 'refAuthor']);
   }
 
   /**
@@ -43,7 +44,7 @@ class QuoteCollection {
    * @return {Promise<HydratedDocument<Quote>> | Promise<null> } - The quote freet with the given quoteId, if any
    */
   static async findOne(quoteId: Types.ObjectId | string): Promise<HydratedDocument<Quote>> {
-    return QuoteModel.findOne({_id: quoteId});
+    return QuoteModel.findOne({_id: quoteId}).populate(['authorId', 'refAuthor']);
   }
 
   /**
@@ -53,7 +54,7 @@ class QuoteCollection {
    */
   static async findAll(): Promise<Array<HydratedDocument<Quote>>> {
     // Retrieves quote freets and sorts them from most to least recent
-    return QuoteModel.find({}).sort({dateModified: -1});
+    return QuoteModel.find({}).sort({dateModified: -1}).populate(['authorId', 'refAuthor']);
   }
 
   /**
@@ -64,7 +65,7 @@ class QuoteCollection {
    */
   static async findAllByUsername(username: string): Promise<Array<HydratedDocument<Quote>>> {
     const author = await UserCollection.findOneByUsername(username);
-    return QuoteModel.find({authorId: author._id});
+    return QuoteModel.find({authorId: author._id}).populate(['authorId', 'refAuthor']);
   }
 
   /**
@@ -75,7 +76,7 @@ class QuoteCollection {
    */
   static async findAllByRef(freetId: string): Promise<Array<HydratedDocument<Quote>>> {
     const freet = await FreetCollection.findOne(freetId);
-    return QuoteModel.find({refID: freet._id, anon: false}); // Only non-anonymized quote freets can be found by reference to original freet
+    return QuoteModel.find({refID: freet._id, anon: false}).populate(['authorId', 'refAuthor']); // Only non-anonymized quote freets can be found by reference to original freet
   }
 
   /**
@@ -85,7 +86,7 @@ class QuoteCollection {
    * @return {Promise<HydratedDocument<Quote>[]>} - An array of all of the quote freets
    */
   static async findAllByAnon(anon: boolean): Promise<Array<HydratedDocument<Quote>>> {
-    return QuoteModel.find({anon});
+    return QuoteModel.find({anon}).populate(['authorId', 'refAuthor']);
   }
 
   /**
@@ -108,7 +109,7 @@ class QuoteCollection {
 
     quote.dateModified = new Date();
     await quote.save();
-    return quote;
+    return quote.populate(['authorId', 'refAuthor']);
   }
 
   /**

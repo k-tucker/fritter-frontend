@@ -1,12 +1,13 @@
 import type {HydratedDocument} from 'mongoose';
 import moment from 'moment';
-import type {Quote} from './model';
+import type {Quote, PopulatedQuote} from './model';
 
 // Update this if you add a property to the Freet type!
 type QuoteResponse = {
   _id: string;
-  refId: string;
-  authorId: string;
+  refAuthor: string;
+  refContent: string;
+  author: string;
   dateCreated: string;
   content: string;
   dateModified: string;
@@ -29,17 +30,23 @@ const formatDate = (date: Date): string => moment(date).format('MMMM Do YYYY, h:
  * @returns {QuoteResponse} - The freet object formatted for the frontend
  */
 const constructQuoteResponse = (quote: HydratedDocument<Quote>): QuoteResponse => {
-  const quoteCopy: Quote = {
+  const quoteCopy: PopulatedQuote = {
     ...quote.toObject({
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-
+  const {username} = quoteCopy.authorId;
+  delete quoteCopy.authorId;
+  const refAuthor = quoteCopy.refAuthor.username;
+  delete quoteCopy.refAuthor;
+  // console.log(refUsername);
+  // delete quoteCopy.refId.authorId;
   return {
     ...quoteCopy,
     _id: quoteCopy._id.toString(),
-    refId: quoteCopy.refId.toString(),
-    authorId: quoteCopy.authorId.toString(),
+    refAuthor: refAuthor,
+    refContent: quoteCopy.refContent,
+    author: username,
     dateCreated: formatDate(quote.dateCreated),
     dateModified: formatDate(quote.dateModified),
     anon: quoteCopy.anon

@@ -11,6 +11,7 @@ const store = new Vuex.Store({
   state: {
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
+    quotes: [], // All quotes created in the app
     username: null, // Username of the logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
@@ -45,13 +46,28 @@ const store = new Vuex.Store({
        */
       state.freets = freets;
     },
+    updateQuotes(state, quotes) {
+      /**
+       * Update the stored quotes to the provided quotes.
+       * @param quotes - Quotes to store
+       */
+      state.quotes = quotes;
+    },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
        */
-      const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
+      const url = state.filter ? `/api/freets?author=${state.filter}` : '/api/freets';
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
+    },
+    async refreshQuotes(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      const url = state.filter ? `/api/quotes?author=${state.filter}` : '/api/quotes';
+      const res = await fetch(url).then(async r => r.json());
+      state.quotes = res;
     }
   },
   // Store data across page refreshes, only discard on browser close

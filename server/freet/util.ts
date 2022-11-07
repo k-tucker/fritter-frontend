@@ -35,9 +35,6 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
     })
   };
   const {username} = freetCopy.authorId;
-  // const user = await UserCollection.findOneByUserId(freetCopy.authorId);
-  // console.log(user.username);
-  // console.log(freetCopy.content);
   delete freetCopy.authorId;
   return {
     ...freetCopy,
