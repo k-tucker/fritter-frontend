@@ -65,7 +65,7 @@
         Posted by an anonymous user.
       </p>
       <p>
-        "{{ quote.refContent }}"
+        {{ quote.refContent }}
       </p>
     </div>
     <p class="info">
