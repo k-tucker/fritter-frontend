@@ -104,27 +104,22 @@ class UserCollection {
   }
 
   /**
-   * Find all highlighted freets by user with userId.
+   * Find all highlighted freets by user with username.
    *
-   * @param {string} userId - The userId of the user to find
+   * @param {string} username - The username of the user whose highlights to find
    * @return {Promise<HydratedDocument<Freet>[]> | Promise<null>} - The user with the given username, if any
    */
-  static async findHighlights(userId: string): Promise<Array<HydratedDocument<Freet>>> {
-    const user = await (await UserCollection.findOneByUsername(userId)).populate('highlights');
-    // console.log(user.highlights);
-    const {highlights} = await (await UserCollection.findOneByUserId(user._id)).populate('highlights');
-    // console.log(...user.highlights);
+  static async findHighlights(username: string): Promise<Array<HydratedDocument<Freet>>> {
+    const user = await UserCollection.findOneByUsername(username);
+    // const {highlights} = await UserCollection.findOneByUserId(user._id);
     const highlightStrings = new Set<string>();
-    for (const highlight of highlights) {
+    for (const highlight of user.highlights) {
       highlightStrings.add(highlight.toString());
     }
 
-    // console.log(...highlightStrings);
-    const freets = await FreetCollection.findAllByUsername(user.username);
+    const freets = await FreetCollection.findAllByUsername(username);
     const result = [];
-    // console.log(freets);
     for (const freet of freets) {
-      // console.log(freet._id.toString());
       if (highlightStrings.has(freet._id.toString())) {
         result.push(freet);
       }
@@ -142,6 +137,7 @@ class UserCollection {
    */
   static async createHighlight(userId: Types.ObjectId | string, freetId: Types.ObjectId): Promise<HydratedDocument<User>> {
     const user = await UserModel.findOne({_id: userId}).populate('highlights');
+    const freet = await FreetCollection.highlight(freetId);
     const highlightsCopy = new Set<string>(user.highlights);
     highlightsCopy.add((freetId.toString()));
     user.highlights = Array.from(highlightsCopy);
@@ -162,6 +158,7 @@ class UserCollection {
    */
   static async deleteHighlight(userId: Types.ObjectId | string, freetId: Types.ObjectId): Promise<HydratedDocument<User>> {
     const user = await UserModel.findOne({_id: userId}).populate('highlights');
+    const freet = await FreetCollection.unhighlight(freetId);
     const highlightsCopy = new Set(user.highlights);
     // console.log(highlightsCopy);
     // console.log('freetId string:', freetId.toString());

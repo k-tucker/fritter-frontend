@@ -2,6 +2,7 @@ import type {HydratedDocument, Types} from 'mongoose';
 import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
+import { freetRouter } from './router';
 
 /**
  * This files contains a class that has the functionality to explore freets
@@ -25,7 +26,8 @@ class FreetCollection {
       authorId,
       dateCreated: date,
       content,
-      dateModified: date
+      dateModified: date,
+      highlight: false
     });
     await UserCollection.addFreet(authorId, freet._id); // Associate freet with user on user-side
     await freet.save(); // Saves freet to MongoDB
@@ -105,6 +107,28 @@ class FreetCollection {
     await FreetModel.deleteMany({authorId});
     await UserCollection.deleteManyFreet(authorId);
   }
+
+  /**
+   * Highlight freet
+   *
+   * @param {string} authorId - The id of author of freets
+   */
+     static async highlight(freetId: Types.ObjectId | string): Promise<void> {
+      const freet = await FreetCollection.findOne(freetId);
+      freet.highlight = true;
+      await freet.save();
+    }
+
+  /**
+   * Delete all the freets by the given author
+   *
+   * @param {string} authorId - The id of author of freets
+   */
+         static async unhighlight(freetId: Types.ObjectId): Promise<void> {
+          const freet = await FreetCollection.findOne(freetId);
+          freet.highlight = false;
+          await freet.save();
+        }
 }
 
 export default FreetCollection;

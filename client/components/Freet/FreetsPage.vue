@@ -61,7 +61,7 @@
       <article
         v-else
       >
-        <h3>No posts found.</h3>
+        <h3>You've reached the end.</h3>
       </article>
     </section>
   </main>

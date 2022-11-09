@@ -3,7 +3,7 @@
 
 <template>
   <article
-    class="freet"
+  v-bind:class="[isActive ? 'freet' : 'highlight']"
   >
     <header>
       <h3 class="author">
@@ -24,6 +24,24 @@
           @click="stopEditing"
         >
           🚫 Discard changes
+        </button>
+
+        <!-- div 1 -->
+        <!-- <div class='div' v-bind:class="[isActive ? 'red' : 'blue']" @click="toggleClass()"></div> -->
+        <!-- div 2
+        <div class='div' v-bind:class="[isActive ? 'blue' : 'red']" @click="isActive = !isActive"></div> -->
+        
+        <button
+          v-if="highlightCondition2"
+          @click="highlightPost"
+        >
+          ⭐️ Highlight
+        </button>
+        <button
+          v-if="highlightCondition1"
+          @click="unhighlightPost"
+        >
+          ⭐️ Highlighted
         </button>
         <button
           v-if="!editing"
@@ -128,14 +146,22 @@ export default {
     },
     anonCondition2() {
       return this.quoting && !(this.anon);
+    },
+    highlightCondition1() {
+      return !this.editing && this.highlighted;
+    },
+    highlightCondition2() {
+      return !this.editing && !(this.highlighted);
     }
   },
   data() {
     return {
       editing: false, // Whether or not this freet is in edit mode
       liked: false,
+      highlighted: this.freet.highlight,
       quoting: false,
       anon: false,
+      isActive: true,
       draft: this.freet.content, // Potentially-new content for this freet
       alerts: {}, // Displays success/error messages encountered during freet modification
       quoteText: ''
@@ -161,12 +187,66 @@ export default {
        * Toggles on a like on this post.
        */
       this.liked = true; // Keeps track of if a freet is being edited
+
+      const params = {
+        method: 'POST',
+        message: 'Successfully liked freet!',
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.like(params);
     },
     unlikePost() {
       /**
        * Toggles off the like on this post.
        */
       this.liked = false;
+
+      const params = {
+        method: 'DELETE',
+        message: 'Successfully unliked freet!',
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.like(params);
+    },
+    highlightPost() {
+      /**
+       * Toggles a highlight on this post.
+       */
+      this.highlighted = true; // Keeps track of if a freet is already highlighted
+
+      const params = {
+        method: 'POST',
+        message: 'Successfully highlighted freet!',
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.highlight(params);
+      this.isActive = !this.isActive;
+    },
+    unhighlightPost() {
+      /**
+       * Toggles the highlight on this post.
+       */
+      this.highlighted = false;
+
+      const params = {
+        method: 'DELETE',
+        message: 'Successfully unhighlighted freet!',
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.highlight(params);
+      this.isActive = !this.isActive;
     },
     anonymize() {
       /**
@@ -328,15 +408,44 @@ export default {
       }
 
       try {
-        const r = await fetch('/api/likes', options);
+        const r = await fetch(`/api/likes/${this.freet._id}&Freet`, options);
         if (!r.ok) {
           const res = await r.json();
           throw new Error(res.error);
         }
 
-        this.quoting = false;
         this.$store.commit('refreshFreets');
         this.$store.commit('refreshQuotes');
+
+        params.callback();
+      } catch (e) {
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+      }
+  },
+  async highlight(params) {
+      /**
+       * Submits a highlight request to the like endpoint.
+       * @param params - Options for the request
+       * @param params.body - Body for the request, if it exists
+       * @param params.callback - Function to run if the the request succeeds
+       */
+      const options = {
+        method: params.method, headers: {'Content-Type': 'application/json'}
+      };
+      if (params.body) {
+        options.body = params.body;
+      }
+
+      try {
+        const r = await fetch(`/api/users/highlights/${this.freet._id}`, options);
+        if (!r.ok) {
+          const res = await r.json();
+          throw new Error(res.error);
+        }
+
+        this.$store.commit('refreshFreets');
+        this.$store.commit('refreshHighlights')
 
         params.callback();
       } catch (e) {
@@ -351,6 +460,12 @@ export default {
 <style scoped>
 .freet {
     border: 1px solid #111;
+    padding: 20px;
+    position: relative;
+}
+.highlight {
+    border: 5px solid rgb(52, 14, 105);
+    background-color: rgb(190, 175, 211);
     padding: 20px;
     position: relative;
 }

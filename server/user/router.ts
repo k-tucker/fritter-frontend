@@ -177,7 +177,7 @@ router.delete(
 /**
  * Get highlights by author.
  *
- * @name GET /api/highlights?authorId=id
+ * @name GET /api/highlights?author=username
  *
  * @return {FreetResponse[]} - An array of highlights created by user with id, authorId
  * @throws {400} - If authorId is not given
@@ -289,6 +289,28 @@ router.delete(
     const user = await UserCollection.findOneByUserId(req.session.userId);
     const toFollow = await UserCollection.findOneByUsername(req.params.username);
     await UserCollection.deleteFollow(user._id, toFollow._id);
+    const response = util.constructUserResponse(user);
+    res.status(200).json(response);
+  }
+);
+
+/**
+ * Get number of people this user is following.
+ *
+ * @name GET /api/users/follow
+ *
+ * @return {UserResponse[]} - An array of highlights created by user with id, authorId
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ *
+ */
+ router.get(
+  '/follow',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUserId(req.session.userId);
     const response = util.constructUserResponse(user);
     res.status(200).json(response);
   }

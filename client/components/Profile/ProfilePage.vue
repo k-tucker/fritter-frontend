@@ -1,23 +1,18 @@
-<!-- Default page that also displays freets -->
+<!-- Displays a user's profile page -->
 
 <template>
   <main>
     <section>
+      <ProfileHeader />
+    </section>
+    <section>
       <header>
         <div class="left">
-          <h2>
-            Viewing all posts
-            <span v-if="$store.state.filter">
-              by @{{ $store.state.filter }}
-            </span>
-          </h2>
+          <h3>Viewing all posts</h3>
         </div>
         <div class="right">
-          <GetPostsForm
-            ref="getPostsForm"
-            value="author"
-            placeholder="🔍 Filter by author (optional)"
-            button="🔄 Get posts"
+          <GetUserPostsForm
+            ref="getUserPostsForm"
           />
         </div>
       </header>
@@ -42,7 +37,7 @@
       <article
         v-else
       >
-        <h3>No posts found.</h3>
+        <h3>You've reached the end.</h3>
       </article>
     </section>
   </main>
@@ -51,21 +46,18 @@
 <script>
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import QuoteComponent from '@/components/Quote/QuoteComponent.vue';
-import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
-import GetPostsForm from '@/components/Freet/GetPostsForm.vue';
+import GetUserPostsForm from '@/components/Profile/GetUserPostsForm.vue';
+import ProfileHeader from '@/components/Profile/ProfileHeader.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, QuoteComponent, GetPostsForm, CreateFreetForm},
+  components: {FreetComponent, QuoteComponent, GetUserPostsForm, ProfileHeader},
   mounted() {
-    this.$refs.getPostsForm.submit();
+    this.$refs.getUserPostsForm.submit();
   },
   computed: {
     console: () => console,
     window: () => window,
-    posts() {
-      return ($store.state.freets.length) || ($store.state.quotes.length);
-    }
   }
 };
 </script>

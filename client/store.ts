@@ -13,6 +13,7 @@ const store = new Vuex.Store({
     freets: [], // All freets created in the app
     quotes: [], // All quotes created in the app
     username: null, // Username of the logged in user
+    highlights: [], // all highlighted posts of logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
   mutations: {
@@ -68,7 +69,15 @@ const store = new Vuex.Store({
       const url = state.filter ? `/api/quotes?author=${state.filter}` : '/api/quotes';
       const res = await fetch(url).then(async r => r.json());
       state.quotes = res;
-    }
+    },
+    async refreshHighlights(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      const url = `/api/users/highlights?author=${state.username}`;
+      const res = await fetch(url).then(async r => r.json());
+      state.highlights = res;
+    },
   },
   // Store data across page refreshes, only discard on browser close
   plugins: [createPersistedState()]
