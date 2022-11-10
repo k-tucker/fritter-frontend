@@ -14,6 +14,7 @@ const store = new Vuex.Store({
     quotes: [], // All quotes created in the app
     username: null, // Username of the logged in user
     highlights: [], // all highlighted posts of logged in user
+    fritform: null,
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
   mutations: {
@@ -54,6 +55,13 @@ const store = new Vuex.Store({
        */
       state.quotes = quotes;
     },
+    updateFritForm(state, fritform) {
+      /**
+       * Update the stored quotes to the provided quotes.
+       * @param fritform - Quotes to store
+       */
+      state.fritform = fritform;
+    },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
@@ -77,6 +85,17 @@ const store = new Vuex.Store({
       const url = `/api/users/highlights?author=${state.username}`;
       const res = await fetch(url).then(async r => r.json());
       state.highlights = res;
+    },
+    async refreshFritForm(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      const url = '/api/fritforms';
+      const res = await fetch(url).then(async r => r.json());
+      if (!res.ok) {
+        state.fritform = null;
+      }
+      state.fritform = res;
     },
   },
   // Store data across page refreshes, only discard on browser close

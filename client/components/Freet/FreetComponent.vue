@@ -161,7 +161,7 @@ export default {
       highlighted: this.freet.highlight,
       quoting: false,
       anon: false,
-      isActive: true,
+      isActive: !this.freet.highlight,
       draft: this.freet.content, // Potentially-new content for this freet
       alerts: {}, // Displays success/error messages encountered during freet modification
       quoteText: ''
@@ -459,13 +459,13 @@ export default {
 
 <style scoped>
 .freet {
-    border: 1px solid #111;
+    border: 3px solid rgb(204, 213, 174);
     padding: 20px;
     position: relative;
 }
 .highlight {
-    border: 5px solid rgb(52, 14, 105);
-    background-color: rgb(190, 175, 211);
+    border: 5px solid rgb(212, 163, 115);
+    background-color: rgb(213, 191, 169);
     padding: 20px;
     position: relative;
 }

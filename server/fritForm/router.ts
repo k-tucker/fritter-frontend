@@ -4,6 +4,7 @@ import UserCollection from '../user/collection';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
 import FritFormCollection from './collection';
+import * as fritFormValidator from '../fritForm/middleware';
 
 const router = express.Router();
 
@@ -22,7 +23,8 @@ const router = express.Router();
 router.post(
   '/',
   [
-    userValidator.isUserLoggedIn
+    userValidator.isUserLoggedIn,
+    fritFormValidator.isNoFritFormExists
   ],
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUserId((req.session.userId as string));
@@ -49,7 +51,8 @@ router.post(
 router.put(
   '/',
   [
-    userValidator.isUserLoggedIn
+    userValidator.isUserLoggedIn,
+    fritFormValidator.isFritFormExists  
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
@@ -73,8 +76,8 @@ router.put(
 router.delete(
   '/',
   [
-    userValidator.isUserLoggedIn
-    // ADD: does user have a fritform set up?
+    userValidator.isUserLoggedIn,
+    fritFormValidator.isFritFormExists
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
@@ -83,6 +86,28 @@ router.delete(
     res.status(200).json({
       message: 'Your fritform has been deleted successfully.'
     });
+  }
+);
+
+/**
+   * Get a fritform.
+   *
+   * @name GET /api/fritforms
+   *
+   * @return {string} - A success message
+   * @throws {403} - If the user is not logged in
+   */
+ router.get(
+  '/',
+  [
+    userValidator.isUserLoggedIn,
+    fritFormValidator.isFritFormExists
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const fritform = await FritFormCollection.findOneByUserId(userId);
+    const response = util.constructFritFormResponse(fritform);
+    res.status(200).json(response);
   }
 );
 

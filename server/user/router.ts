@@ -214,7 +214,6 @@ router.post(
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUserId(req.session.userId);
     const freetId = new mongoose.Types.ObjectId(req.params.freetId);
-    // console.log(freetId);
     await UserCollection.createHighlight(user._id, freetId);
     const response = util.constructUserResponse(user);
     res.status(200).json(response);

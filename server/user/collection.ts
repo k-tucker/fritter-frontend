@@ -141,11 +141,8 @@ class UserCollection {
     const highlightsCopy = new Set<string>(user.highlights);
     highlightsCopy.add((freetId.toString()));
     user.highlights = Array.from(highlightsCopy);
-    // user.highlights = highlightsCopy;
-    // console.log(highlightsCopy);
     user.markModified('highlights');
     await user.save();
-    // console.log('highlights', user.highlights);
     return user;
   }
 
@@ -160,13 +157,8 @@ class UserCollection {
     const user = await UserModel.findOne({_id: userId}).populate('highlights');
     const freet = await FreetCollection.unhighlight(freetId);
     const highlightsCopy = new Set(user.highlights);
-    // console.log(highlightsCopy);
-    // console.log('freetId string:', freetId.toString());
     highlightsCopy.delete((freetId.toString()));
-    // console.log(freetId);
-    // console.log(highlightsCopy);
     user.highlights = Array.from(highlightsCopy);
-    // user.highlights = highlightsCopy;
     user.markModified('highlights');
     await user.save();
     return user;

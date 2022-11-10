@@ -22,6 +22,12 @@
       </router-link>
       <router-link
         v-if="$store.state.username"
+        to="/fritform"
+      >
+        FritForm
+      </router-link>
+      <router-link
+        v-if="$store.state.username"
         to="/account"
       >
         Settings
@@ -48,7 +54,7 @@
 <style scoped>
 nav {
     padding: 1vw 2vw;
-    background-color: #ccc;
+    background-color: rgb(204, 213, 174);
     display: flex;
     justify-content: space-between;
     align-items: center;

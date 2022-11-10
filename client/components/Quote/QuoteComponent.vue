@@ -263,14 +263,15 @@ export default {
 
 <style scoped>
 .quote {
-    border: 1px solid #111;
+    border: 3px solid rgb(204, 213, 174);
     padding: 20px;
     position: relative;
 }
 .ref {
-    border: 1px solid #111;
+    border: 3px solid rgb(214, 210, 175);
     padding: 20px;
     position: relative;
+    background-color: rgb(254, 250, 224);
 }
 .refAuthor {
     font-weight: bold;

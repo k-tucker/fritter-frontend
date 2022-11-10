@@ -1,6 +1,7 @@
 import type {Request, Response, NextFunction} from 'express';
 import {Types} from 'mongoose';
 import UserCollection from '../user/collection';
+import FritFormCollection from './collection';
 
 /**
  * Checks if a username in req.body is already in use
@@ -35,6 +36,36 @@ const isUserLoggedOut = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
+ * Checks if the user has a FritForm set up already
+ */
+ const isFritFormExists = async (req: Request, res: Response, next: NextFunction) => {
+  const fritform = await FritFormCollection.findOneByUserId(req.session.userId);
+  if (!fritform) {
+    res.status(404).json({
+      error: 'You have not set up a FritForm yet.'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if the user has a FritForm set up already
+ */
+ const isNoFritFormExists = async (req: Request, res: Response, next: NextFunction) => {
+  const fritform = await FritFormCollection.findOneByUserId(req.session.userId);
+  if (fritform) {
+    res.status(403).json({
+      error: 'You have already set up a FritForm.'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
  * Checks if a user with userId as author id in req.query exists
  */
 const isAuthorExists = async (req: Request, res: Response, next: NextFunction) => {
@@ -59,5 +90,7 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
 export {
   isUserLoggedOut,
   isUsernameNotAlreadyInUse,
-  isAuthorExists
+  isAuthorExists,
+  isFritFormExists,
+  isNoFritFormExists
 };

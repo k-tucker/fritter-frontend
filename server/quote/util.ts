@@ -39,8 +39,6 @@ const constructQuoteResponse = (quote: HydratedDocument<Quote>): QuoteResponse =
   delete quoteCopy.authorId;
   const refAuthor = quoteCopy.refAuthor.username;
   delete quoteCopy.refAuthor;
-  // console.log(refUsername);
-  // delete quoteCopy.refId.authorId;
   return {
     ...quoteCopy,
     _id: quoteCopy._id.toString(),
